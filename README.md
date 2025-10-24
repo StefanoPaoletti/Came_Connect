@@ -1,89 +1,130 @@
-# CAME Integration - Versione Personalizzata
-![Esempio di Immagine](Came.png)
+# Came Connect
 
-***
-⚠️ **Questa è una versione modificata e ottimizzata dell'integrazione CAME originale**
+Integrazione Home Assistant per impianti domotici CAME ETI/Domo, versione ottimizzata.
 
-Basata sul lavoro di [Den901/ha_came](https://github.com/Den901/ha_came) - grazie Danny! 🙏
+Basata sul lavoro originale di [Den901](https://github.com/Den901/ha_came).
 
-Questa versione include modifiche specifiche per il mio impianto CAME, con ottimizzazioni e correzioni di bug.
-***
+## Modifiche rispetto all'integrazione originale
 
-## 🔧 Modifiche Rispetto all'Originale
+- Risolto problema che bloccava Home Assistant durante la disinstallazione
+- Corretta procedura di disinstallazione con timeout
+- Semplificati ID univoci: `{platform}.{nome_dispositivo}_{act_id}` (es: `light.cucina_59`)
+- Configurazione solo tramite UI (rimosso supporto YAML)
+- Rimossa dipendenza dal token di autenticazione
+- Energy sensor ora mantengono i valori dopo il riavvio di Home Assistant
 
-- ✅ Risolto problema dispositivi duplicati quando rinominati in CAME
-- ✅ Ottimizzata velocità e ridotta lentezza
-- ✅ Semplificati i nomi delle entità
-- ✅ Migliorata gestione del riavvio di Home Assistant
-- ✅ Corretta procedura di disinstallazione
-- ✅ Rimossa dipendenza dal token (utilizza solo username e password)
-- ✅ Configurazione solo tramite UI (più semplice e moderna)
+**Nota importante:** La migrazione degli ID dispositivo deve essere effettuata manualmente. I dispositivi avranno nuovi ID univoci basati sui nomi originali CAME.
 
-## 📦 Installazione
+## Installazione
 
-### Tramite HACS (Consigliato)
+### Installazione tramite HACS
 
-1. Apri **HACS** in Home Assistant
-2. Vai in **Integrazioni**
-3. Clicca sui tre puntini in alto a destra
-4. Seleziona **Repository personalizzati**
-5. Aggiungi l'URL: `https://github.com/StefanoPaoletti/ha_came_personale`
-6. Categoria: **Integrazione**
-7. Cerca "CAME (Stefano)" e clicca **Scarica**
+1. Apri HACS in Home Assistant
+2. Clicca su "Integrazioni"
+3. Clicca sul menu in alto a destra → "Archivi personalizzati"
+4. Aggiungi l'URL: `https://github.com/StefanoPaoletti/Came_Connect`
+5. Seleziona categoria: "Integration"
+6. Clicca "Aggiungi"
+7. Cerca "Came Connect" e clicca "Scarica"
 8. Riavvia Home Assistant
 
-### Installazione Manuale
+### Configurazione
 
-1. Scarica la [ultima release][releases-latest]
-2. Estrai il contenuto nella cartella `custom_components/came` di Home Assistant
-3. Riavvia Home Assistant
+1. Vai su Impostazioni → Dispositivi e servizi
+2. Clicca "+ Aggiungi integrazione"
+3. Cerca "Came Connect"
+4. Inserisci l'indirizzo IP del tuo ETI/Domo
+5. Completa la configurazione
 
-## ⚙️ Configurazione
+## Migrazione dall'integrazione originale (Den901)
 
-1. Vai in **Impostazioni** → **Dispositivi e Servizi**
-2. Clicca il pulsante **"+ Aggiungi integrazione"**
-3. Cerca **"CAME"**
-4. Inserisci i dati richiesti:
-   - **Host**: Indirizzo IP del tuo dispositivo CAME ETI/Domo (es. `192.168.1.100`)
-   - **Username**: Nome utente (default: `admin`)
-   - **Password**: Password (default: `admin`)
-5. Clicca **Invia**
+Se hai già installato l'integrazione di Den901 e non riesci a disinstallare, segui questi passaggi:
 
-Fatto! I tuoi dispositivi CAME verranno automaticamente rilevati e aggiunti a Home Assistant. 🎉
+### 1. Installa Came Connect
 
-## 🛠️ Servizi Disponibili
+- Aggiungi il repository a HACS come descritto sopra
+- Installa "Came Connect"
+- Riavvia Home Assistant
 
-- `came.force_update` - Forza l'aggiornamento di tutti i dispositivi
-- `came.pull_devices` - Rileva nuovi dispositivi
-- `came.refresh_scenarios` - Aggiorna l'elenco degli scenari
+### 2. Rimuovi l'integrazione Den901
 
-## 🐛 Debug
+- Vai su Impostazioni → Dispositivi e servizi
+- Trova "CAME ETI/Domo" (Den901)
+- Clicca sui tre puntini → Elimina
 
-Per abilitare i log di debug, aggiungi al tuo `configuration.yaml`:
+### 3. Rimuovi il repository Den901 da HACS
+
+- Apri HACS → Integrazioni
+- Cerca "CAME ETI/Domo"
+- Clicca sui tre puntini → Rimuovi
+
+### 4. Pulisci configuration.yaml
+
+Rimuovi la configurazione YAML se presente:
+```yaml
+came:
+  host: ...
+  username: ...
+  password: ...
+  token: ...
+```
+
+Riavvia Home Assistant.
+
+### 5. Configura Came Connect
+
+- Vai su Impostazioni → Dispositivi e servizi
+- Clicca "+ Aggiungi integrazione"
+- Cerca "Came Connect"
+- Inserisci l'indirizzo IP del tuo ETI/Domo
+
+## Dispositivi supportati e testati
+
+L'integrazione è stata testata con successo con i seguenti dispositivi:
+
+- Luci on/off
+- Termostati (climatizzazione e riscaldamento)
+- Relè generici (switch)
+- Energy sensor (monitoraggio consumi)
+- Digital input (sensori binari)
+
+## Servizi disponibili
+
+L'integrazione espone i seguenti servizi per automazioni avanzate:
+
+`came.force_update` - Forza l'aggiornamento immediato dello stato di tutti i dispositivi.
+```yaml
+service: came.force_update
+```
+
+`came.pull_devices` - Rileva e aggiunge automaticamente nuovi dispositivi dall'ETI/Domo.
+```yaml
+service: came.pull_devices
+```
+
+`came.refresh_scenarios` - Aggiorna l'elenco degli scenari disponibili.
+```yaml
+service: came.refresh_scenarios
+```
+
+## Debug
+
+Per abilitare i log di debug, aggiungi al file `configuration.yaml`:
 ```yaml
 logger:
   default: info
   logs:
     custom_components.came: debug
-    custom_components.came.pycame: debug
 ```
 
-Poi riavvia Home Assistant.
+Riavvia Home Assistant per applicare le modifiche.
 
-## ⚠️ Nota Importante
+I log saranno disponibili in Impostazioni → Sistema → Log o nel file `/config/home-assistant.log`.
 
-Questa è una versione **personalizzata** ottimizzata per il mio specifico impianto. Potrebbe non funzionare perfettamente con altre configurazioni.
+## Supporto
 
-**Per il progetto originale e supporto ufficiale**, visita: [Repository originale di Den901](https://github.com/Den901/ha_came)
+Per segnalare problemi o richiedere nuove funzionalità, apri una issue su GitHub: https://github.com/StefanoPaoletti/Came_Connect/issues
 
-## 📄 Licenza
+## Licenza
 
-MIT License - Vedi file [LICENSE](LICENSE) per il testo completo.
-
-## 🙏 Crediti
-
-- **Autore Originale**: [Danny Mauro (Den901)](https://github.com/Den901)
-- **Modifiche**: Stefano Paoletti
-
-***
-[releases-latest]: https://github.com/StefanoPaoletti/ha_came_personale/releases/latest
+MIT License - vedi file LICENSE per dettagli.
