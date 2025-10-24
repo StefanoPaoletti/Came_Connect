@@ -2,7 +2,7 @@
 The CAME Integration Component - Optimized by Stefano Paoletti
 
 Based on original work by Den901
-For more details: https://github.com/StefanoPaoletti/ha_came_personale
+For more details: https://github.com/StefanoPaoletti/Came_Connect
 """
 import asyncio
 import logging
@@ -278,3 +278,4 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         _LOGGER.info("CAME integration unloaded successfully")
     
     return unload_ok
+
