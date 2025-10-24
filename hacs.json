@@ -1,5 +1,5 @@
 {
-  "name": "CAME Connect",
+  "name": "Came Connect",
   "domain": "came",
   "documentation": "https://github.com/StefanoPaoletti/ha_came_personale",
   "codeowners": ["@StefanoPaoletti"],
