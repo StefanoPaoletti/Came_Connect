@@ -5,7 +5,7 @@
         },
         "step": {
             "user": {
-                "title": "Integrazione CAME ETI/Domo",
+                "title": "Configura Came Connect",
                 "description": "Configura il tuo dispositivo CAME ETI/Domo. Per assistenza visita: https://github.com/StefanoPaoletti/ha_came_personale",
                 "data": {
                     "host": "Indirizzo IP del dispositivo",
