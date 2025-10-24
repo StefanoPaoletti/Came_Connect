@@ -44,7 +44,7 @@ from .const import (
     SIGNAL_DELETE_ENTITY,
     SIGNAL_DISCOVERY_NEW,
     SIGNAL_UPDATE_ENTITY,
-    get_startup_message,  # ← MODIFICATO: era STARTUP_MESSAGE
+    STARTUP_MESSAGE,  # ← MODIFICATO: era get_startup_message
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
     # Print startup message
     if DOMAIN not in hass.data:
-        _LOGGER.info(get_startup_message())  # ← MODIFICATO: era STARTUP_MESSAGE
+        _LOGGER.info(STARTUP_MESSAGE)  # ← MODIFICATO: era get_startup_message()
         hass.data[DOMAIN] = {}
 
     config = entry.data.copy()
