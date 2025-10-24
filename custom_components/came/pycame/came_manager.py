@@ -11,7 +11,7 @@ from typing import List, Optional
 
 import requests
 
-from .const import DEBUG_DEEP, get_startup_message, get_version  # ← MODIFICATO
+from .const import DEBUG_DEEP, STARTUP_MESSAGE, VERSION  # ← MODIFICATO
 from .devices import get_featured_devices
 from .devices.base import CameDevice, DeviceState
 from .devices.came_scenarios import ScenarioManager
@@ -42,7 +42,7 @@ class CameManager:
     ):
         """Initialize connection with the CAME ETI/Domo."""
         if not _STARTUP:
-            _LOGGER.info(get_startup_message())  # ← MODIFICATO
+            _LOGGER.info(STARTUP_MESSAGE)  # ← MODIFICATO
             _STARTUP.append(True)
 
         _LOGGER.debug("Setup CAME ETI/Domo API for %s@%s", username, host)
@@ -81,7 +81,7 @@ class CameManager:
         """Handle a request to a CAME ETI/Domo device."""
         url = f"http://{self._host}/domo/"
         headers = {
-            "User-Agent": f"PythonCameManager-Stefano/{get_version()}",  # ← MODIFICATO
+            "User-Agent": f"PythonCameManager-Stefano/{VERSION}",  # ← MODIFICATO
             "Accept": "application/json, text/plain, */*",
             "Content-Type": "application/x-www-form-urlencoded",
         }
