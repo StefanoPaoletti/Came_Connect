@@ -1,24 +1,32 @@
-# CAME Integration - Versione Personalizzata
+# Contributi
 
-Questa integrazione è basata sul progetto originale di [Den901](https://github.com/Den901/ha_came) ed è stata ottimizzata e personalizzata per il mio specifico impianto CAME.
+Questo repository è una versione ottimizzata dell'integrazione CAME originale di [Den901](https://github.com/Den901/ha_came), personalizzata per specifiche esigenze.
 
-## ⚠️ Nota Importante
+## Policy sui contributi
 
-Questo repository contiene modifiche specifiche per la mia configurazione e potrebbe non funzionare correttamente con altri setup. È condiviso pubblicamente per trasparenza e come riferimento, ma **non accetto pull request o contributi esterni**.
+Questo progetto **non accetta pull request o contributi esterni**. Il codice è condiviso pubblicamente per trasparenza e come riferimento.
 
-## Modifiche Principali
+## Modifiche apportate
 
-- Risolti problemi di duplicazione dispositivi
-- Ottimizzata la velocità di risposta
-- Semplificati i nomi delle entità
-- Migliorata la gestione del riavvio di Home Assistant
-- Corretta la procedura di disinstallazione
+Le principali modifiche rispetto all'integrazione originale includono:
 
-## Vuoi Contribuire?
+- Risolto problema che bloccava Home Assistant durante la disinstallazione
+- Corretta procedura di disinstallazione con timeout
+- Semplificati ID univoci basati sui nomi originali CAME
+- Configurazione solo tramite UI (rimosso supporto YAML)
+- Rimossa dipendenza dal token di autenticazione
+- Energy sensor ora mantengono i valori dopo il riavvio di Home Assistant
 
-Se hai trovato bug o vuoi suggerire miglioramenti al progetto **originale**, ti prego di aprire una issue su:
-👉 [Repository originale di Den901](https://github.com/Den901/ha_came)
+## Segnalazione problemi
+
+Per segnalare bug o problemi specifici di questa versione, è possibile aprire una issue su questo repository:
+https://github.com/StefanoPaoletti/Came_Connect/issues
+
+## Contribuire al progetto originale
+
+Per contribuire al progetto originale o segnalare problemi generali dell'integrazione CAME, fare riferimento al repository originale:
+https://github.com/Den901/ha_came
 
 ## Licenza
 
-Come il progetto originale, questo codice è rilasciato sotto licenza MIT.
+Questo progetto è rilasciato sotto licenza MIT, come il progetto originale.
