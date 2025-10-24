@@ -1,7 +1,7 @@
 """Support for CAME scenarios.
 
 Versione ottimizzata da Stefano Paoletti
-For more details: https://github.com/StefanoPaoletti/ha_came_personale
+For more details: https://github.com/StefanoPaoletti/Came_Connect
 """
 import asyncio
 import logging
