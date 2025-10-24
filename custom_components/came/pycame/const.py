@@ -13,9 +13,11 @@ DEBUG_DEEP = False
 ISSUE_URL = "https://github.com/StefanoPaoletti/ha_came_personale/issues"
 
 
-def get_version() -> str:
-    """Get version from manifest.json (two levels up)"""
+# Read version ONCE at module import (before event loop starts)
+def _load_version() -> str:
+    """Load version from manifest.json at module import time."""
     try:
+        # Go up two directories: pycame -> came -> manifest.json
         manifest_path = Path(__file__).parent.parent / "manifest.json"
         with open(manifest_path, encoding="utf-8") as f:
             manifest = json.load(f)
@@ -24,34 +26,16 @@ def get_version() -> str:
         return "unknown"
 
 
-# Lazy load version
-_VERSION = None
+# Load version immediately at import (not in event loop)
+VERSION = _load_version()
 
-def _get_version_cached() -> str:
-    """Get cached version (read only once)"""
-    global _VERSION
-    if _VERSION is None:
-        _VERSION = get_version()
-    return _VERSION
-
-
-# Export for backwards compatibility
-VERSION = property(lambda self: _get_version_cached())
-
-
-STARTUP_MESSAGE_TEMPLATE = """
+# Startup message with version already embedded
+STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
 CAME ETI/Domo API Python Client - Optimized Version
-Version: {version}
+Version: {VERSION}
 Based on original work by Den901
 For issues or suggestions:
-{issue_url}
+{ISSUE_URL}
 -------------------------------------------------------------------
 """
-
-def get_startup_message() -> str:
-    """Get startup message with current version"""
-    return STARTUP_MESSAGE_TEMPLATE.format(
-        version=_get_version_cached(),
-        issue_url=ISSUE_URL
-    )
