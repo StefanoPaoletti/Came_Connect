@@ -1,4 +1,4 @@
-"""Python integration for CAME ETI/Domo.
+"""Python integration for Came Connect.
 
 Versione ottimizzata da Stefano Paoletti
 Based on original work by Danny Mauro (Den901)
