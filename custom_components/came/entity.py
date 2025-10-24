@@ -1,7 +1,7 @@
 """
 The CAME Integration Component.
 For more details about this platform, please refer to the documentation at
-https://github.com/StefanoPaoletti/ha_came_personale
+https://github.com/StefanoPaoletti/Came_Connect
 """
 import logging
 from typing import Any, Dict, Optional
