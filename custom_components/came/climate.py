@@ -1,7 +1,7 @@
 """Support for the CAME climate devices (thermostats and fan coils).
 
 Versione ottimizzata da Stefano Paoletti
-For more details: https://github.com/StefanoPaoletti/ha_came_personale
+For more details: https://github.com/StefanoPaoletti/Came_Connect
 """
 
 import logging
