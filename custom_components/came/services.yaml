@@ -1,6 +1,6 @@
 # Describes the format for available CAME services
 # CAME Integration - Optimized Version
-# For more details: https://github.com/StefanoPaoletti/ha_came_personale
+# For more details: https://github.com/StefanoPaoletti/Came_Connect
 
 pull_devices:
   name: Pull Devices
