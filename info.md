@@ -1,80 +1,53 @@
-# CAME Integration - Versione Personalizzata di Stefano
+# Came Connect
 
-⚠️ **Basata sul progetto originale di [Den901](https://github.com/Den901/ha_came)**
+Integrazione Home Assistant per impianti domotici CAME ETI/Domo, versione ottimizzata.
 
-Questa è una versione ottimizzata per il mio specifico impianto CAME.
+Basata sul lavoro originale di [Den901](https://github.com/Den901/ha_came).
 
-***
+## Modifiche rispetto all'integrazione originale
 
-## 🔧 Modifiche e Miglioramenti
+- Risolto problema che bloccava Home Assistant durante la disinstallazione
+- Corretta procedura di disinstallazione con timeout
+- Semplificati ID univoci basati sui nomi originali CAME
+- Configurazione solo tramite UI (rimosso supporto YAML)
+- Rimossa dipendenza dal token di autenticazione
+- Energy sensor ora mantengono i valori dopo il riavvio di Home Assistant
 
-- ✅ Risolto problema dispositivi duplicati
-- ✅ Ottimizzata velocità
-- ✅ Nomi entità semplificati
-- ✅ Migliorata gestione riavvio HA
-- ✅ Corretta disinstallazione
-- ✅ Rimossa dipendenza dal token
-- ✅ Configurazione solo tramite UI
+**Nota:** La migrazione degli ID dispositivo deve essere effettuata manualmente.
 
-***
+## Piattaforme supportate
 
-## Piattaforme Supportate
+| Piattaforma | Descrizione |
+|-------------|-------------|
+| `light` | Luci on/off, dimmer e RGB |
+| `climate` | Termostati e zone termiche |
+| `cover` | Tapparelle e coperture motorizzate |
+| `switch` | Relè generici |
+| `sensor` | Sensori analogici e contatori energia |
+| `binary_sensor` | Ingressi digitali |
+| `scene` | Scenari CAME |
 
-Piattaforma | Descrizione
--- | --
-`binary_sensor` | Sensori di stato (ingressi digitali)
-`climate` | Zone termiche (termostati e fan coil)
-`light` | Luci, dimmer e RGB
-`cover` | Tapparelle e coperture
-`sensor` | Sensori analogici e contatori energia
-`switch` | Relè generici
-`scene` | Scenari CAME
+## Installazione
 
-![came-logo][came-logo]
+### Tramite HACS
 
-## Funzionalità:
+1. Apri HACS → Integrazioni
+2. Clicca sul menu (tre puntini) → Archivi personalizzati
+3. Aggiungi URL: `https://github.com/StefanoPaoletti/Came_Connect`
+4. Categoria: Integration
+5. Cerca "Came Connect" e clicca "Scarica"
+6. Riavvia Home Assistant
 
-- Controllo luci, dimmer, RGB
-- Gestione sensori analogici (temperatura, umidità, pressione)
-- Gestione entità climatiche (termostati e fan coil)
-- Gestione aperture (tapparelle, porte, cancelli)
-- Monitoraggio energia (consumo e produzione)
-- Attivazione scenari CAME
-- Controllo relè generici
-- Sensori di stato (ingressi digitali)
+### Configurazione
 
-## 📦 Installazione
+1. Vai su Impostazioni → Dispositivi e servizi
+2. Clicca "+ Aggiungi integrazione"
+3. Cerca "Came Connect"
+4. Inserisci l'indirizzo IP del tuo ETI/Domo
 
-### Tramite HACS (Consigliato)
+## Debug
 
-1. Apri **HACS** in Home Assistant
-2. Vai in **Integrazioni**
-3. Clicca sui tre puntini in alto a destra
-4. Seleziona **Repository personalizzati**
-5. Aggiungi l'URL: `https://github.com/StefanoPaoletti/ha_came_personale`
-6. Categoria: **Integrazione**
-7. Cerca "CAME (Stefano)" e clicca **Scarica**
-8. Riavvia Home Assistant
-
-### Installazione Manuale
-
-1. Scarica `came.zip` dalla [sezione releases][releases-latest]
-2. Estrai tutti i file nella cartella `custom_components/came`
-3. Riavvia Home Assistant
-
-## ⚙️ Configurazione
-
-1. Vai in **Impostazioni** → **Dispositivi e Servizi**
-2. Clicca **"+ Aggiungi integrazione"**
-3. Cerca **"CAME"**
-4. Compila il form:
-   - **Host**: `192.168.1.100` (il tuo IP)
-   - **Username**: `admin` (default)
-   - **Password**: `admin` (default)
-
-## 🐛 Debug
-
-Aggiungi al `configuration.yaml`:
+Aggiungi al file `configuration.yaml`:
 ```yaml
 logger:
   default: info
@@ -82,16 +55,13 @@ logger:
     custom_components.came: debug
 ```
 
-## ⚠️ Importante
+Riavvia Home Assistant per applicare le modifiche.
 
-Versione personalizzata - potrebbe non funzionare con altre configurazioni CAME.
+## Supporto
 
-**Per supporto ufficiale**: [Repository Originale Den901](https://github.com/Den901/ha_came)
+Per segnalare problemi o richiedere nuove funzionalità:
+https://github.com/StefanoPaoletti/Came_Connect/issues
 
-## 📄 Licenza
+## Licenza
 
-MIT License - Basato sul lavoro originale di Danny Mauro (Den901)
-
-***
-[came-logo]: came-logo.png
-[releases-latest]: https://github.com/StefanoPaoletti/ha_came_personale/releases/latest
+MIT License - vedi [LICENSE](https://github.com/StefanoPaoletti/Came_Connect/blob/main/LICENSE) per dettagli.
