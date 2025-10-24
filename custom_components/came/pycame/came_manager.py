@@ -2,7 +2,7 @@
 
 Versione ottimizzata da Stefano Paoletti
 Based on original work by Danny Mauro (Den901)
-For more details: https://github.com/StefanoPaoletti/ha_came_personale
+For more details: https://github.com/StefanoPaoletti/Came_Connect
 """
 
 import json
