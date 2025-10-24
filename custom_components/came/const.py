@@ -15,8 +15,9 @@ ISSUE_URL = "https://github.com/StefanoPaoletti/ha_came_personale/issues"
 DATA_YAML = f"{DOMAIN}__yaml"
 
 
-def get_version() -> str:
-    """Get version from manifest.json"""
+# Read version ONCE at module import (before event loop starts)
+def _load_version() -> str:
+    """Load version from manifest.json at module import time."""
     try:
         manifest_path = Path(__file__).parent / "manifest.json"
         with open(manifest_path, encoding="utf-8") as f:
@@ -26,32 +27,20 @@ def get_version() -> str:
         return "unknown"
 
 
-# Lazy load version for startup message
-_VERSION = None
+# Load version immediately at import (not in event loop)
+VERSION = _load_version()
 
-def _get_version_cached() -> str:
-    """Get cached version (read only once)"""
-    global _VERSION
-    if _VERSION is None:
-        _VERSION = get_version()
-    return _VERSION
-
-
+# Startup message with version already embedded
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
 {NAME}
-Version: {{version}}
+Version: {VERSION}
 Versione ottimizzata per impianto personale
 Basata sul progetto originale di Den901
 Per problemi o suggerimenti:
 {ISSUE_URL}
 -------------------------------------------------------------------
 """
-
-def get_startup_message() -> str:
-    """Get startup message with current version"""
-    return STARTUP_MESSAGE.format(version=_get_version_cached())
-
 
 # Icons
 # Device classes
