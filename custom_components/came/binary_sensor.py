@@ -1,7 +1,7 @@
 """Support for the CAME digital inputs (binary sensors).
 
 Versione ottimizzata da Stefano Paoletti
-For more details: https://github.com/StefanoPaoletti/ha_came_personale
+For more details: https://github.com/StefanoPaoletti/Came_Connect
 """
 import logging
 from typing import List
@@ -105,3 +105,4 @@ class CameDigitalInEntity(CameEntity, BinarySensorEntity):
         """Return the device class of the binary sensor."""
         # Ritorna la device class se disponibile dal dispositivo CAME
         return getattr(self._device, 'device_class', None)
+
