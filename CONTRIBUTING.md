@@ -1,32 +1,32 @@
-# Contributi
+# Contributing
 
-Questo repository è una versione ottimizzata dell'integrazione CAME originale di [Den901](https://github.com/Den901/ha_came), personalizzata per specifiche esigenze.
+This repository is an optimized version of the original CAME integration by [Den901](https://github.com/Den901/ha_came), customized for specific needs.
 
-## Policy sui contributi
+## Contribution Policy
 
-Questo progetto **non accetta pull request o contributi esterni**. Il codice è condiviso pubblicamente per trasparenza e come riferimento.
+This project **does not accept pull requests or external contributions**. The code is shared publicly for transparency and as a reference.
 
-## Modifiche apportate
+## Changes Made
 
-Le principali modifiche rispetto all'integrazione originale includono:
+The main changes compared to the original integration include:
 
-- Risolto problema che bloccava Home Assistant durante la disinstallazione
-- Corretta procedura di disinstallazione con timeout
-- Semplificati ID univoci basati sui nomi originali CAME
-- Configurazione solo tramite UI (rimosso supporto YAML)
-- Rimossa dipendenza dal token di autenticazione
-- Energy sensor ora mantengono i valori dopo il riavvio di Home Assistant
+- Fixed issue that blocked Home Assistant during uninstallation
+- Corrected uninstallation procedure with timeout
+- Simplified unique IDs based on original CAME names
+- UI-only configuration (removed YAML support)
+- Removed authentication token dependency
+- Energy sensors now maintain values after Home Assistant restart
 
-## Segnalazione problemi
+## Reporting Issues
 
-Per segnalare bug o problemi specifici di questa versione, è possibile aprire una issue su questo repository:
+To report bugs or issues specific to this version, you can open an issue on this repository:
 https://github.com/StefanoPaoletti/Came_Connect/issues
 
-## Contribuire al progetto originale
+## Contributing to the Original Project
 
-Per contribuire al progetto originale o segnalare problemi generali dell'integrazione CAME, fare riferimento al repository originale:
+To contribute to the original project or report general CAME integration issues, please refer to the original repository:
 https://github.com/Den901/ha_came
 
-## Licenza
+## License
 
-Questo progetto è rilasciato sotto licenza MIT, come il progetto originale.
+This project is released under the MIT License, like the original project.
