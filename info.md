@@ -1,53 +1,42 @@
 # Came Connect
 
-Integrazione Home Assistant per impianti domotici CAME ETI/Domo, versione ottimizzata.
+Home Assistant integration for CAME ETI/Domo home automation systems - optimized version.
 
-Basata sul lavoro originale di [Den901](https://github.com/Den901/ha_came).
+Based on original work by [Den901](https://github.com/Den901/ha_came).
 
-## Modifiche rispetto all'integrazione originale
+## Key Changes from Original
 
-- Risolto problema che bloccava Home Assistant durante la disinstallazione
-- Corretta procedura di disinstallazione con timeout
-- Semplificati ID univoci basati sui nomi originali CAME
-- Configurazione solo tramite UI (rimosso supporto YAML)
-- Rimossa dipendenza dal token di autenticazione
-- Energy sensor ora mantengono i valori dopo il riavvio di Home Assistant
+- Fixed Home Assistant freeze during uninstallation
+- Corrected uninstallation procedure with timeout
+- Simplified unique IDs based on original CAME names
+- UI-only configuration (YAML support removed)
+- Removed authentication token dependency
+- Energy sensors now retain values after Home Assistant restart
 
-**Nota:** La migrazione degli ID dispositivo deve essere effettuata manualmente.
+**Note:** Device ID migration must be done manually.
 
-## Piattaforme supportate
+## Supported Platforms
 
-| Piattaforma | Descrizione |
-|-------------|-------------|
-| `light` | Luci on/off, dimmer e RGB |
-| `climate` | Termostati e zone termiche |
-| `cover` | Tapparelle e coperture motorizzate |
-| `switch` | Relè generici |
-| `sensor` | Sensori analogici e contatori energia |
-| `binary_sensor` | Ingressi digitali |
-| `scene` | Scenari CAME |
+| Platform | Description |
+|----------|-------------|
+| `light` | On/off lights, dimmers and RGB |
+| `climate` | Thermostats and thermal zones |
+| `cover` | Shutters and motorized covers |
+| `switch` | Generic relays |
+| `sensor` | Analog sensors and energy meters |
+| `binary_sensor` | Digital inputs |
+| `scene` | CAME scenarios |
 
-## Installazione
+## Configuration
 
-### Tramite HACS
-
-1. Apri HACS → Integrazioni
-2. Clicca sul menu (tre puntini) → Archivi personalizzati
-3. Aggiungi URL: `https://github.com/StefanoPaoletti/Came_Connect`
-4. Categoria: Integration
-5. Cerca "Came Connect" e clicca "Scarica"
-6. Riavvia Home Assistant
-
-### Configurazione
-
-1. Vai su Impostazioni → Dispositivi e servizi
-2. Clicca "+ Aggiungi integrazione"
-3. Cerca "Came Connect"
-4. Inserisci l'indirizzo IP del tuo ETI/Domo
+1. Go to Settings → Devices & Services
+2. Click "+ Add Integration"
+3. Search for "Came Connect"
+4. Enter your ETI/Domo IP address
 
 ## Debug
 
-Aggiungi al file `configuration.yaml`:
+Add to `configuration.yaml`:
 ```yaml
 logger:
   default: info
@@ -55,13 +44,13 @@ logger:
     custom_components.came: debug
 ```
 
-Riavvia Home Assistant per applicare le modifiche.
+Restart Home Assistant to apply changes.
 
-## Supporto
+## Support
 
-Per segnalare problemi o richiedere nuove funzionalità:
+To report issues or request features:
 https://github.com/StefanoPaoletti/Came_Connect/issues
 
-## Licenza
+## License
 
-MIT License - vedi [LICENSE](https://github.com/StefanoPaoletti/Came_Connect/blob/main/LICENSE) per dettagli.
+MIT License - see [LICENSE](https://github.com/StefanoPaoletti/Came_Connect/blob/main/LICENSE) for details.
