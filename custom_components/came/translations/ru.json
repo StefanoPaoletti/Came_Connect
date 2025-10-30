@@ -6,7 +6,7 @@
         "step": {
             "user": {
                 "title": "Интеграция Came Connect",
-                "description": "Настройте устройство CAME ETI/Domo. Для помощи посетите: https://github.com/StefanoPaoletti/Came_Connect",
+                "description": "Настройте устройство ETI/Domo. Для помощи посетите: https://github.com/StefanoPaoletti/Came_Connect",
                 "data": {
                     "host": "IP-адрес устройства",
                     "username": "Имя пользователя (по умолчанию: admin)",
