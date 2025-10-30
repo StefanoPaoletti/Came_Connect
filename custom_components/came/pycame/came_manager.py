@@ -30,7 +30,7 @@ _STARTUP = []
 
 
 class CameManager:
-    """Main class for handling connections with a CAME ETI/Domo device."""
+    """Main class for handling connections with a Came Connect device."""
 
     def __init__(
         self,
@@ -40,12 +40,12 @@ class CameManager:
         session: Optional[requests.Session] = None,
         hass: Optional["HomeAssistant"] = None,
     ):
-        """Initialize connection with the CAME ETI/Domo."""
+        """Initialize connection with the Came Connect."""
         if not _STARTUP:
             _LOGGER.info(STARTUP_MESSAGE)  # ← MODIFICATO
             _STARTUP.append(True)
 
-        _LOGGER.debug("Setup CAME ETI/Domo API for %s@%s", username, host)
+        _LOGGER.debug("Setup Came Connect API for %s@%s", username, host)
 
         self._host = host
         self._username = username
@@ -64,21 +64,21 @@ class CameManager:
         
     @property
     def software_version(self) -> Optional[str]:
-        """Return software version of ETI/Domo."""
+        """Return software version of Came Connect."""
         return self._swver
 
     @property
     def serial(self) -> Optional[str]:
-        """Return serial number of ETI/Domo."""
+        """Return serial number of Came Connect."""
         return self._serial
 
     @property
     def keycode(self) -> Optional[str]:
-        """Return keycode for ETI/Domo."""
+        """Return keycode for Came Connect."""
         return self._keycode
 
     def _request(self, command: dict, resp_command: str = None) -> dict:
-        """Handle a request to a CAME ETI/Domo device."""
+        """Handle a request to a Came Connect device."""
         url = f"http://{self._host}/domo/"
         headers = {
             "User-Agent": f"PythonCameManager-Stefano/{VERSION}",  # ← MODIFICATO
@@ -100,7 +100,7 @@ class CameManager:
 
         except requests.exceptions.ConnectTimeout as exception:
             raise ETIDomoConnectionTimeoutError(
-                "Timeout occurred while connecting to CAME ETI/Domo device."
+                "Timeout occurred while connecting to Came Connect device."
             ) from exception
 
         except (
@@ -109,7 +109,7 @@ class CameManager:
             requests.exceptions.BaseHTTPError,
         ) as exception:
             raise ETIDomoConnectionError(
-                "Error occurred while communicating with CAME ETI/Domo device."
+                "Error occurred while communicating with Came Connect device."
             ) from exception
 
         try:
@@ -154,15 +154,15 @@ class CameManager:
 
     @property
     def connected(self) -> bool:
-        """Return True if connected to CAME device."""
+        """Return True if connected to Came device."""
         return self._client_id is not None
 
     def login(self) -> None:
-        """Login function for access to CAME ETI/Domo."""
+        """Login function for access to Came Connect."""
         if self._client_id:
             return
 
-        _LOGGER.debug("Attempting login to CAME device")
+        _LOGGER.debug("Attempting login to Came device")
         response = self._request(
             {
                 "sl_cmd": "sl_registration_req",
@@ -174,7 +174,7 @@ class CameManager:
 
         try:
             if response["sl_client_id"]:
-                _LOGGER.debug("Successful authorization to CAME device")
+                _LOGGER.debug("Successful authorization to Came device")
                 self._client_id = response.get("sl_client_id")
                 self._features = []
                 self._devices = None
@@ -186,7 +186,7 @@ class CameManager:
     def application_request(
         self, command: dict, resp_command: str = "generic_reply"
     ) -> dict:
-        """Handle a request to application layer of CAME ETI/Domo."""
+        """Handle a request to application layer of Came Connect."""
         self.login()
 
         if DEBUG_DEEP:
@@ -203,7 +203,7 @@ class CameManager:
                 },
             )
         except ETIDomoConnectionError as err:
-            _LOGGER.debug("CAME server goes offline, resetting client_id")
+            _LOGGER.debug("Came server goes offline, resetting client_id")
             self._client_id = None
             raise err
 
@@ -217,7 +217,7 @@ class CameManager:
         return response
 
     def _get_features(self) -> list:
-        """Get list of available features from CAME device."""
+        """Get list of available features from Came device."""
         if self._features:
             return self._features
 
@@ -269,11 +269,11 @@ class CameManager:
         for room in response.get("room_list", []):
             self._rooms.append(Room.from_dict(room))
         
-        _LOGGER.debug("Loaded %d room(s) from CAME device", len(self._rooms))
+        _LOGGER.debug("Loaded %d room(s) from Came device", len(self._rooms))
         return self._rooms
 
     def _update_devices(self) -> Optional[List[CameDevice]]:
-        """Update devices info from CAME device."""
+        """Update devices info from Came device."""
         if self._devices is None:
             _LOGGER.debug("Updating devices info from CAME")
 
@@ -283,7 +283,7 @@ class CameManager:
 
             self._devices = devices
             _LOGGER.info(
-                "Loaded %d device(s) from CAME: %s",
+                "Loaded %d device(s) from Came: %s",
                 len(self._devices),
                 [d.type for d in self._devices]
             )
@@ -340,7 +340,7 @@ class CameManager:
         return devices
 
     def status_update(self, timeout: Optional[int] = None) -> bool:
-        """Long polling method which reads status updates from CAME device."""
+        """Long polling method which reads status updates from Came device."""
         if self._devices is None:
             self._update_devices()
             return True
