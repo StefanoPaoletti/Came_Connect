@@ -10,14 +10,14 @@ from typing import Any, Dict
 
 @dataclass
 class Floor:
-    """Object holding the CAME ETI/Domo floor description."""
+    """Object holding the Came Connect floor description."""
 
     id: int
     name: str
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> Floor:
-        """Return a Floor object from a CAME ETI/Domo API response."""
+        """Return a Floor object from a Came Connect API response."""
         return Floor(
             id=int(data["floor_ind"]),
             name=str(data["name"]),
@@ -26,7 +26,7 @@ class Floor:
 
 @dataclass
 class Room:
-    """Object holding the CAME ETI/Domo room description."""
+    """Object holding the Came Connect room description."""
 
     id: int
     name: str
@@ -34,7 +34,7 @@ class Room:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> Room:
-        """Return a Room object from a CAME ETI/Domo API response."""
+        """Return a Room object from a Came Connect API response."""
         return Room(
             id=int(data["room_ind"]),
             name=str(data["name"]),
