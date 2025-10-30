@@ -17,15 +17,15 @@ class ETIDomoError(Exception):
 
 
 class ETIDomoConnectionError(ETIDomoError):
-    """CAME ETI/Domo connection exception."""
+    """Came Connect connection exception."""
 
 
 class ETIDomoConnectionTimeoutError(ETIDomoConnectionError, TimeoutError):
-    """CAME ETI/Domo connection timeout exception."""
+    """Came Connect connection timeout exception."""
 
 
 class ETIDomoUnmanagedDeviceError(ETIDomoError):
-    """CAME ETI/Domo exception for unmanaged device."""
+    """Came Connect exception for unmanaged device."""
 
     def __init__(
         self, status: str = "This device is unmanageable", errno: Optional[int] = None
