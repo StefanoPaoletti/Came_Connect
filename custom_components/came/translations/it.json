@@ -6,7 +6,7 @@
         "step": {
             "user": {
                 "title": "Configura Came Connect",
-                "description": "Configura il tuo dispositivo CAME ETI/Domo. Per assistenza visita: https://github.com/StefanoPaoletti/Came_Connect",
+                "description": "Configura il tuo dispositivo ETI/Domo. Per assistenza visita: https://github.com/StefanoPaoletti/Came_Connect",
                 "data": {
                     "host": "Indirizzo IP del dispositivo",
                     "username": "Nome utente (predefinito: admin)",
