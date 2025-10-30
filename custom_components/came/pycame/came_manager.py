@@ -1,4 +1,4 @@
-"""Python client for CAME ETI/Domo.
+"""Python client for Came Connect.
 
 Versione ottimizzata da Stefano Paoletti
 Based on original work by Danny Mauro (Den901)
