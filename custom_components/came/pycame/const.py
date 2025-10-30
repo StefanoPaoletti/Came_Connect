@@ -1,4 +1,4 @@
-"""Python client for CAME ETI/Domo - Constants.
+"""Python client for Came Connect - Constants.
 Versione ottimizzata da Stefano Paoletti
 Based on original work by Danny Mauro (Den901)
 For more details: https://github.com/StefanoPaoletti/Came_Connect
