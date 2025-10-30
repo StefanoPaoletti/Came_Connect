@@ -10,7 +10,7 @@ from pathlib import Path
 DEBUG_DEEP = False
 
 # Issue tracker URL
-ISSUE_URL = "https://github.com/StefanoPaoletti/ha_came_personale/issues"
+ISSUE_URL = "https://github.com/StefanoPaoletti/Came_Connect/issues"
 
 
 # Read version ONCE at module import (before event loop starts)
@@ -32,7 +32,7 @@ VERSION = _load_version()
 # Startup message with version already embedded
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
-CAME ETI/Domo API Python Client - Optimized Version
+Came Connect API Python Client - Optimized Version
 Version: {VERSION}
 Based on original work by Den901
 For issues or suggestions:
