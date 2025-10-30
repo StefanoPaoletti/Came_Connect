@@ -9,7 +9,7 @@ from pathlib import Path
 
 # Base component constants
 NAME = "CAME Connect"
-DOMAIN = "came_connect"
+DOMAIN = "came"
 ATTRIBUTION = "Data provided by Came Connect"
 ISSUE_URL = "https://github.com/StefanoPaoletti/Came_Connect/issues"
 DATA_YAML = f"{DOMAIN}__yaml"
