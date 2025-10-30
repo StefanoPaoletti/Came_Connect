@@ -7,10 +7,10 @@ from typing import Optional
 
 
 class ETIDomoError(Exception):
-    """Generic CAME ETI/Domo exception."""
+    """Generic Came Connect exception."""
 
     def __init__(self, status: str, errno: Optional[int] = None):
-        """Initialize ETI/Domo error."""
+        """Initialize Came Connect error."""
         super().__init__(status)
         self.status = status
         self.errno = errno
