@@ -1,4 +1,4 @@
-"""CAME ETI/Domo thermoregulation device implementation.
+"""ETI/Domo thermoregulation device."""
 
 import logging
 from typing import Optional
