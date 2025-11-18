@@ -7,12 +7,12 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
     SensorDeviceClass,
-    RestoreEntity,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import StateType
 from homeassistant.util import dt as dt_util
 from homeassistant.util.unit_system import PRESSURE_UNITS, TEMPERATURE_UNITS
@@ -46,7 +46,7 @@ async def async_setup_entry(
 
 def _setup_entities(hass, dev_ids):
     """Set up CAME analog sensor device."""
-    manager = hass.data[DOMAIN][CONF_MANAGER]
+    manager = hass.data[DOMAIN][CONF_MANAGER]  # type: CameManager
     entities = []
     for dev_id in dev_ids:
         device = manager.get_device_by_id(dev_id)
@@ -126,10 +126,8 @@ class CameEnergySensorEntity(CameEntity, SensorEntity):
         """Return the extra attributes."""
         return self._device.extra_state_attributes or {}
 
-class CameEnergyTotalSensorEntity(CameEntity, RestoreEntity, SensorEntity):
+class CameEnergyTotalSensorEntity(CameEntity, SensorEntity, RestoreEntity):
     """Sensor that integrates power to compute energy."""
-
-    _attr_should_poll = True
 
     def __init__(self, source_entity: CameEnergySensorEntity, produced: int = 0):
         super().__init__(source_entity._device)
@@ -150,48 +148,23 @@ class CameEnergyTotalSensorEntity(CameEntity, RestoreEntity, SensorEntity):
         self._energy_total = 0.0
 
     async def async_added_to_hass(self):
-        """Restore previous state when entity is added."""
+        """Restore energy value after Home Assistant restart."""
         await super().async_added_to_hass()
-        
-        last_state = await self.async_get_last_state()
-        
-        if last_state and last_state.state not in (None, "unknown", "unavailable"):
+        state = await self.async_get_last_state()
+        if state and state.state not in (None, "unknown", "unavailable"):
             try:
-                self._energy_total = float(last_state.state)
-                _LOGGER.info(
-                    "Restored energy for %s: %.3f kWh",
-                    self.entity_id,
-                    self._energy_total
-                )
+                self._energy_total = float(state.state)
             except (ValueError, TypeError):
-                _LOGGER.warning("Could not restore energy for %s", self.entity_id)
                 self._energy_total = 0.0
-        else:
-            _LOGGER.info("No previous state for %s, starting from 0 kWh", self.entity_id)
 
     def update(self):
-        """Update energy calculation."""
         now = dt_util.utcnow()
         power = self._source_entity.native_value
-        
         if self._last_time is not None and isinstance(power, (int, float)):
             elapsed_hours = (now - self._last_time).total_seconds() / 3600
-            energy_increment = (power * elapsed_hours) / 1000
-            self._energy_total += energy_increment
-            
-            if energy_increment > 0.0001:
-                _LOGGER.debug(
-                    "Energy %s: +%.4f kWh (power=%dW, dt=%.1fs) -> %.3f kWh",
-                    self.entity_id,
-                    energy_increment,
-                    int(power),
-                    (now - self._last_time).total_seconds(),
-                    self._energy_total
-                )
-        
+            self._energy_total += (power * elapsed_hours) / 1000  # da W a kWh
         self._last_time = now
 
     @property
     def native_value(self):
-        """Return total energy in kWh."""
         return round(self._energy_total, 3)
