@@ -1,4 +1,4 @@
-"""Support for the CAME climate devices (thermostats and fan coils).
+"""Support for the CAME climate devices."""
 
 import logging
 from typing import Optional, Any, Dict
