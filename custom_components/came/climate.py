@@ -252,3 +252,4 @@ class CameFancoilClimateEntity(CameClimateEntity):
         #_LOGGER.info("🔁 [ASYNC] Cambio velocità ventilatore: richiesta %s", fan_mode)
         await self.hass.async_add_executor_job(self.set_fan_mode, fan_mode)
         self.async_write_ha_state()
+        
