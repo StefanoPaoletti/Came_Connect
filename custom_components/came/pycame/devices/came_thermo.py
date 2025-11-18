@@ -253,4 +253,3 @@ class CameThermo(CameDevice):
     def set_fan_mode_ha(self, mode: str) -> None:
         """Accetta nomi HA (low/medium/high/auto) → chiama set_fan_speed."""
         self.set_fan_speed(mode.upper())    
-        
