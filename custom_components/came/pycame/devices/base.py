@@ -104,6 +104,11 @@ class CameDevice(ABC):
         # Limit name part to 20 chars to keep ID reasonable
         if len(name_part) > 20:
             name_part = name_part[:20]
+            # Re-strip: truncation can leave a trailing underscore
+            # (e.g. "basculante_sw_start_" from "basculante_sw_start_cucina"),
+            # which combined with the "_{act_id}" below produced invalid
+            # double-underscore IDs like "basculante_sw_start__132".
+            name_part = name_part.rstrip('_')
         
         # Format: name_actid
         # Example: salotto_123 instead of 0_salotto_123
