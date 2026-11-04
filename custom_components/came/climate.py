@@ -96,7 +96,7 @@ class CameClimateEntity(CameEntity, ClimateEntity):
         super().__init__(device)
         self.entity_id = ENTITY_ID_FORMAT.format(self.unique_id)
         self._attr_target_temperature_step = PRECISION_TENTHS
-        self._attr_temperature_unit = UnitOfTemperature.CELSIUS
+        self._attr_native_temperature_unit = UnitOfTemperature.CELSIUS
 
     @property
     def supported_features(self) -> ClimateEntityFeature:
@@ -115,11 +115,11 @@ class CameClimateEntity(CameEntity, ClimateEntity):
         return feat
         
     @property
-    def current_temperature(self) -> Optional[float]:
+    def native_current_temperature(self) -> Optional[float]:
         return self._device.current_temperature
 
     @property
-    def target_temperature(self) -> Optional[float]:
+    def native_target_temperature(self) -> Optional[float]:
         if self._device.mode == THERMO_MODE_AUTO:
             reason = self._device.reason
             if reason is None or reason not in (1, 2, 3):
