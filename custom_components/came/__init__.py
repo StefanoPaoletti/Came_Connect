@@ -23,8 +23,9 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_PASSWORD,
     CONF_USERNAME,
+    EVENT_HOMEASSISTANT_STOP,
 )
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.dispatcher import async_dispatcher_send, dispatcher_send
 from homeassistant.helpers.start import async_at_started
@@ -124,6 +125,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN]["came_scenario_manager"] = manager.scenario_manager
 
     thread.start()
+
+    # HA does not unload config entries on shutdown: stop the listener here,
+    # otherwise every HA stop/restart waits for this thread to time out.
+    @callback
+    def _stop_listener(_event: Event) -> None:
+        stop_event.set()
+
+    entry.async_on_unload(
+        hass.bus.async_listen(EVENT_HOMEASSISTANT_STOP, _stop_listener)
+    )
 
     async def async_energy_polling(hass: HomeAssistant, manager: CameManager, stop_event: threading.Event):
         """Polling async per i dati energia."""
