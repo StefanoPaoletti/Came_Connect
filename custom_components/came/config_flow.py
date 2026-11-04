@@ -13,7 +13,11 @@ from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.helpers.typing import ConfigType
 
 from .pycame.came_manager import CameManager
-from .pycame.exceptions import ETIDomoConnectionError, ETIDomoConnectionTimeoutError
+from .pycame.exceptions import (
+    ETIDomoConnectionError,
+    ETIDomoConnectionTimeoutError,
+    ETIDomoError,
+)
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -97,11 +101,15 @@ class CameFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         except ETIDomoConnectionError as exc:
             _LOGGER.error("CAME connection error: %s", exc)
             return False, "cannot_connect"
-        
-        except ValueError as exc:
-            _LOGGER.error("CAME invalid configuration: %s", exc)
-            return False, "invalid_auth"
-        
+
+        except ETIDomoError as exc:
+            # errno 1 = "Invalid user." from the CAME server
+            if exc.errno == 1:
+                _LOGGER.error("CAME authentication failed: %s", exc)
+                return False, "invalid_auth"
+            _LOGGER.error("CAME error during login: %s", exc)
+            return False, "cannot_connect"
+
         except Exception as exc:  # pylint: disable=broad-except
             _LOGGER.exception("Unexpected error testing CAME connection: %s", exc)
             return False, "unknown"

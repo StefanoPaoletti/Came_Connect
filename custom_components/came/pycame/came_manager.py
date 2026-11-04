@@ -11,7 +11,7 @@ from typing import List, Optional
 
 import requests
 
-from .const import DEBUG_DEEP, STARTUP_MESSAGE, VERSION  # ← MODIFICATO
+from .const import DEBUG_DEEP, VERSION
 from .devices import get_featured_devices
 from .devices.base import CameDevice, DeviceState
 from .devices.came_scenarios import ScenarioManager
@@ -21,12 +21,8 @@ from .exceptions import (
     ETIDomoError,
 )
 from .models import Floor, Room
-from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 _LOGGER = logging.getLogger(__name__)
-
-# Startup message flag (ensures it's printed only once)
-_STARTUP = []
 
 
 class CameManager:
@@ -41,10 +37,6 @@ class CameManager:
         hass: Optional["HomeAssistant"] = None,
     ):
         """Initialize connection with the Came Connect."""
-        if not _STARTUP:
-            _LOGGER.info(STARTUP_MESSAGE)  # ← MODIFICATO
-            _STARTUP.append(True)
-
         _LOGGER.debug("Setup Came Connect API for %s@%s", username, host)
 
         self._host = host
@@ -81,7 +73,7 @@ class CameManager:
         """Handle a request to a Came Connect device."""
         url = f"http://{self._host}/domo/"
         headers = {
-            "User-Agent": f"PythonCameManager-Stefano/{VERSION}",  # ← MODIFICATO
+            "User-Agent": f"PythonCameManager-Stefano/{VERSION}",
             "Accept": "application/json, text/plain, */*",
             "Content-Type": "application/x-www-form-urlencoded",
         }

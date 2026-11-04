@@ -24,13 +24,14 @@ from homeassistant.const import (
     CONF_PASSWORD,
     CONF_USERNAME,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.dispatcher import async_dispatcher_send, dispatcher_send
+from homeassistant.helpers.start import async_at_started
 
 from .pycame.came_manager import CameManager
 from .pycame.devices import CameDevice
-from .pycame.exceptions import ETIDomoConnectionError, ETIDomoConnectionTimeoutError
+from .pycame.exceptions import ETIDomoConnectionError
 from .pycame.devices.base import TYPE_ENERGY_SENSOR
 
 from .const import (
@@ -44,7 +45,7 @@ from .const import (
     SIGNAL_DELETE_ENTITY,
     SIGNAL_DISCOVERY_NEW,
     SIGNAL_UPDATE_ENTITY,
-    STARTUP_MESSAGE,  # ← MODIFICATO: era get_startup_message
+    STARTUP_MESSAGE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -63,9 +64,8 @@ CAME_TYPE_TO_HA = {
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
-    # Print startup message
     if DOMAIN not in hass.data:
-        _LOGGER.info(STARTUP_MESSAGE)  # ← MODIFICATO: era get_startup_message()
+        _LOGGER.info(STARTUP_MESSAGE)
         hass.data[DOMAIN] = {}
 
     config = entry.data.copy()
@@ -85,8 +85,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     try:
         devices = await hass.async_add_executor_job(initial_update)
-    except ETIDomoConnectionTimeoutError as exc:
-        raise ConfigEntryNotReady from exc
+    except ETIDomoConnectionError as exc:
+        # CAME not reachable yet (e.g. HA booted first after a power cut):
+        # HA retries the setup automatically.
+        raise ConfigEntryNotReady(f"CAME not reachable: {exc}") from exc
 
     # Crea evento di stop per thread e polling
     stop_event = threading.Event()
@@ -126,6 +128,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     async def async_energy_polling(hass: HomeAssistant, manager: CameManager, stop_event: threading.Event):
         """Polling async per i dati energia."""
         try:
+            await asyncio.sleep(5)
             while not stop_event.is_set():
                 try:
                     response = await asyncio.wait_for(
@@ -145,16 +148,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
                 if response:
                     meter_updates = response.get("array", [])
+                    received = False
                     if isinstance(meter_updates, list) and manager._devices:
                         for d in meter_updates:
                             for dev in manager._devices:
                                 if dev.type_id == TYPE_ENERGY_SENSOR and d.get("act_id") == dev.act_id:
-                                    if hasattr(dev, "push_update"):
-                                        dev.push_update(d)
-                                        async_dispatcher_send(hass, SIGNAL_UPDATE_ENTITY)
-                
+                                    dev.push_update(d)
+                                    received = True
+                    # One signal per cycle (not one per meter): it also drives
+                    # the kWh integration in the energy total sensors.
+                    if received:
+                        async_dispatcher_send(hass, SIGNAL_UPDATE_ENTITY)
+
                 await asyncio.sleep(10)
-                
+
         except asyncio.CancelledError:
             _LOGGER.debug("Polling energia cancellato")
             raise
@@ -212,31 +219,33 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.services.async_register(DOMAIN, SERVICE_FORCE_UPDATE, async_force_update)
 
-    # Avvia polling energia async
-    async def start_energy_polling(_):
-        await asyncio.sleep(5)
-        hass.data[DOMAIN]["energy_polling_task"] = hass.async_create_task(
-            async_energy_polling(hass, manager, stop_event)
+    # Avvia polling energia: subito se HA è già avviato (es. reload
+    # dell'integrazione), altrimenti appena HA ha finito l'avvio.
+    # Background task: HA cancels it automatically when the entry is unloaded.
+    @callback
+    def start_energy_polling(_hass: HomeAssistant):
+        hass.data[DOMAIN]["energy_polling_task"] = entry.async_create_background_task(
+            hass, async_energy_polling(hass, manager, stop_event), "came_energy_polling"
         )
 
-    hass.bus.async_listen_once("homeassistant_started", start_energy_polling)
-    
+    entry.async_on_unload(async_at_started(hass, start_energy_polling))
+
     async def async_refresh_scenarios_service(call):
         _LOGGER.debug("refresh_scenarios service called")
         scenario_manager = hass.data[DOMAIN]["came_scenario_manager"]
         await hass.async_add_executor_job(scenario_manager.refresh_scenarios)
         _LOGGER.debug("refresh_scenarios completed, sending event 'came_scenarios_refreshed'")
-        dispatcher_send(hass, "came_scenarios_refreshed")
+        async_dispatcher_send(hass, "came_scenarios_refreshed")
 
     hass.services.async_register(DOMAIN, "refresh_scenarios", async_refresh_scenarios_service)
-    
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Unloading the CAME platforms - FIXED WITH TIMEOUT."""
+    """Unloading the CAME platforms."""
     _LOGGER.info("Starting CAME integration unload")
-    
+
     # Ferma il polling energia
     energy_task = hass.data[DOMAIN].get("energy_polling_task")
     if energy_task and not energy_task.done():
@@ -245,19 +254,19 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
             await asyncio.wait_for(energy_task, timeout=2.0)
         except (asyncio.TimeoutError, asyncio.CancelledError):
             _LOGGER.debug("Energy polling task cancelled")
-    
+
     # Ferma il listener thread
     stop_event = hass.data[DOMAIN].get("stop_event")
     if stop_event:
         stop_event.set()
-    
+
     thread = hass.data[DOMAIN].get(CONF_CAME_LISTENER)
     if thread and thread.is_alive():
-        # FIX CRITICO: Timeout di 5 secondi per evitare blocchi infiniti
-        thread.join(timeout=5.0)
+        # Join in the executor: waiting here directly would freeze HA's event loop
+        await hass.async_add_executor_job(thread.join, 5.0)
         if thread.is_alive():
             _LOGGER.warning("Thread did not stop within timeout, forcing cleanup")
-    
+
     # Unload platforms
     unload_ok = all(
         await asyncio.gather(
@@ -269,13 +278,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
             ]
         )
     )
-    
+
     if unload_ok:
         hass.services.async_remove(DOMAIN, SERVICE_FORCE_UPDATE)
         hass.services.async_remove(DOMAIN, SERVICE_PULL_DEVICES)
         hass.services.async_remove(DOMAIN, "refresh_scenarios")
         hass.data.pop(DOMAIN)
         _LOGGER.info("CAME integration unloaded successfully")
-    
-    return unload_ok
 
+    return unload_ok

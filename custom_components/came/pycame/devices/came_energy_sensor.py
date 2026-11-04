@@ -63,10 +63,11 @@ class CameEnergySensor(CameDevice):
             return
         
         updated = self.update_state(state)
-        
-        # If this sensor has a reference to its HA entity, update it
-        if updated and hasattr(self, "hass_entity"):
-            self.hass_entity.async_write_ha_state()
+
+        # Write the HA state only once the entity has been added to HA
+        entity = getattr(self, "hass_entity", None)
+        if updated and entity is not None and entity.hass is not None:
+            entity.async_write_ha_state()
 
     @property
     def state(self) -> StateType:

@@ -96,9 +96,11 @@ class CameSensorEntity(CameEntity, SensorEntity):
         return self._device.state
 
 class CameEnergySensorEntity(CameEntity, SensorEntity):
-    """CAME energy sensor device entity."""
+    """CAME energy sensor device entity.
 
-    _attr_should_poll = True
+    Values arrive from the energy polling in __init__.py (push_update),
+    so this entity does no network requests of its own.
+    """
 
     def __init__(self, device: CameDevice):
         """Init CAME energy sensor device entity."""
@@ -108,10 +110,6 @@ class CameEnergySensorEntity(CameEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_device_class = SensorDeviceClass.POWER
         self._attr_native_unit_of_measurement = "W"
-
-    def update(self):
-        """Update the energy sensor entity."""
-        self._device.update()
 
     @property
     def native_value(self) -> StateType:
@@ -134,11 +132,12 @@ class CameEnergyTotalSensorEntity(CameEntity, SensorEntity, RestoreEntity):
         self._source_entity = source_entity
         self._produced = produced
 
+        # Second entity on the meter's device: HA shows "<device> Energia ..."
         if produced == 1:
-            self._attr_name = f"{source_entity.name} Energia prodotta"
+            self._attr_name = "Energia prodotta"
             self._attr_unique_id = f"{source_entity.unique_id}_energy_produced"
         else:
-            self._attr_name = f"{source_entity.name} Energia consumata"
+            self._attr_name = "Energia consumata"
             self._attr_unique_id = f"{source_entity.unique_id}_energy_consumed"
 
         self._attr_device_class = SensorDeviceClass.ENERGY
