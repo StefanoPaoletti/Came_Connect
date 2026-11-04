@@ -7,9 +7,12 @@ For more details: https://github.com/StefanoPaoletti/Came_Connect
 
 import json
 import logging
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import requests
+
+if TYPE_CHECKING:
+    from homeassistant.core import HomeAssistant
 
 from .const import DEBUG_DEEP, VERSION
 from .devices import get_featured_devices
@@ -105,6 +108,9 @@ class CameManager:
             ) from exception
 
         try:
+            # The CAME may not declare a charset: force UTF-8 so names
+            # with accents ("Città") are not garbled
+            response.encoding = "utf-8"
             resp_json = response.json()
             ack_reason = resp_json.get("sl_data_ack_reason")
 

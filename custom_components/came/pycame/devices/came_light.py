@@ -33,12 +33,12 @@ class CameLight(CameDevice):
     @property
     def light_type(self) -> str:
         """Get light type (STEP_STEP, DIMMER, or RGB)."""
-        return self._device_info.get("type")
+        return (self._device_info.get("type") or "").upper()
 
     @property
     def support_color(self) -> bool:
         """Return True if light supports color as HS values."""
-        return self.light_type.upper() == LIGHT_TYPE_RGB
+        return self.light_type == LIGHT_TYPE_RGB
 
     @property
     def rgb_color(self) -> List[int]:

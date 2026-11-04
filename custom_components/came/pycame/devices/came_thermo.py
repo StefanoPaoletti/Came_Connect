@@ -242,10 +242,6 @@ class CameThermo(CameDevice):
         return self._device_info.get("status")
 
     @property
-    def antifreeze(self) -> Optional[int]:
-        return self._device_info.get("antifreeze")        
-        
-    @property
     def fan_mode_ha(self) -> str:
         """Velocità nel linguaggio di HA (minuscolo)."""
         return self.fan_mode.lower()
