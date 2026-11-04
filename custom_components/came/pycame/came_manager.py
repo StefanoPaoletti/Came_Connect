@@ -27,6 +27,19 @@ from .models import Floor, Room
 
 _LOGGER = logging.getLogger(__name__)
 
+# HTTP timeouts (seconds). Without them a request to a CAME that was switched
+# off abruptly can hang forever and block the status listener.
+CONNECT_TIMEOUT = 5
+READ_TIMEOUT = 10
+# status_update_req is a long poll: the CAME holds it open until something
+# changes, so it gets a longer read timeout. If the CAME holds it longer, the
+# request simply times out and is repeated, keeping the same session.
+STATUS_UPDATE_READ_TIMEOUT = 60
+
+# sl_data_ack_reason codes meaning the session is unknown to the CAME
+# (e.g. after the CAME restarted): log in again and repeat the request.
+SESSION_LOST_ERRNOS = (7, 8)
+
 
 class CameManager:
     """Main class for handling connections with a Came Connect device."""
@@ -55,8 +68,9 @@ class CameManager:
         self._floors = None
         self._rooms = None
         self._devices = None
+        self._resync_needed = False
         self.scenario_manager = ScenarioManager(self)
-        
+
     @property
     def software_version(self) -> Optional[str]:
         """Return software version of Came Connect."""
@@ -72,7 +86,12 @@ class CameManager:
         """Return keycode for Came Connect."""
         return self._keycode
 
-    def _request(self, command: dict, resp_command: str = None) -> dict:
+    def _request(
+        self,
+        command: dict,
+        resp_command: str = None,
+        read_timeout: float = READ_TIMEOUT,
+    ) -> dict:
         """Handle a request to a Came Connect device."""
         url = f"http://{self._host}/domo/"
         headers = {
@@ -86,16 +105,19 @@ class CameManager:
                 _LOGGER.debug("Sending API request: %s", command)
 
             response = self._session.post(
-                url, data={"command": json.dumps(command)}, headers=headers
+                url,
+                data={"command": json.dumps(command)},
+                headers=headers,
+                timeout=(CONNECT_TIMEOUT, read_timeout),
             )
             response.raise_for_status()
 
             if DEBUG_DEEP:
                 _LOGGER.debug("Response received: %s", response.text)
 
-        except requests.exceptions.ConnectTimeout as exception:
+        except requests.exceptions.Timeout as exception:
             raise ETIDomoConnectionTimeoutError(
-                "Timeout occurred while connecting to Came Connect device."
+                "Timeout occurred while communicating with Came Connect device."
             ) from exception
 
         except (
@@ -174,36 +196,51 @@ class CameManager:
             if response["sl_client_id"]:
                 _LOGGER.debug("Successful authorization to Came device")
                 self._client_id = response.get("sl_client_id")
-                self._features = []
-                self._devices = None
+                # Re-login after a disconnection: keep the device objects
+                # (HA entities are bound to them) and resync their state.
+                if self._devices is not None:
+                    self._resync_needed = True
             else:
                 raise ETIDomoError("Error in sl_client_id, can't get value.")
         except KeyError as ex:
             raise ETIDomoError("Error in sl_client_id, can't find value.") from ex
 
     def application_request(
-        self, command: dict, resp_command: str = "generic_reply"
+        self,
+        command: dict,
+        resp_command: str = "generic_reply",
+        read_timeout: float = READ_TIMEOUT,
     ) -> dict:
         """Handle a request to application layer of Came Connect."""
-        self.login()
-
         if DEBUG_DEEP:
             _LOGGER.debug("Sending application layer API request: %s", command)
 
-        cmd = command.copy()
-
-        try:
-            response = self._request(
-                {
-                    "sl_cmd": "sl_data_req",
-                    "sl_client_id": self._client_id,
-                    "sl_appl_msg": cmd,
-                },
-            )
-        except ETIDomoConnectionError as err:
-            _LOGGER.debug("Came server goes offline, resetting client_id")
-            self._client_id = None
-            raise err
+        for attempt in range(2):
+            self.login()
+            try:
+                response = self._request(
+                    {
+                        "sl_cmd": "sl_data_req",
+                        "sl_client_id": self._client_id,
+                        "sl_appl_msg": command.copy(),
+                    },
+                    read_timeout=read_timeout,
+                )
+                break
+            except ETIDomoConnectionError as err:
+                # A read timeout means the CAME is reachable but slow (or a
+                # long poll ran out): keep the session. Anything else means
+                # the CAME went offline: log in again next time.
+                if not isinstance(err.__cause__, requests.exceptions.ReadTimeout):
+                    _LOGGER.debug("Came server goes offline, resetting client_id")
+                    self._client_id = None
+                raise
+            except ETIDomoError as err:
+                if err.errno in SESSION_LOST_ERRNOS and attempt == 0:
+                    _LOGGER.info("CAME session lost (%s), logging in again", err)
+                    self._client_id = None
+                    continue
+                raise
 
         if resp_command is not None and response.get("cmd_name") != resp_command:
             raise ETIDomoError(
@@ -270,16 +307,39 @@ class CameManager:
         _LOGGER.debug("Loaded %d room(s) from Came device", len(self._rooms))
         return self._rooms
 
+    def _fetch_devices(self) -> List[CameDevice]:
+        """Read the device list from the CAME."""
+        devices = []
+        for feature in self._get_features():
+            devices.extend(get_featured_devices(self, feature))
+        return devices
+
+    def _resync_devices(self) -> None:
+        """Reload the device list keeping the existing device objects.
+
+        HA entities hold references to these objects: replacing them would
+        leave the entities frozen. Known devices get their fresh state,
+        new devices are added, devices no longer on the CAME are dropped
+        (their entities are removed by the pull_devices service).
+        """
+        current = {device.unique_id: device for device in self._devices or []}
+        devices = []
+        for fresh in self._fetch_devices():
+            device = current.get(fresh.unique_id)
+            if device is None:
+                devices.append(fresh)
+            else:
+                device._device_info = fresh._device_info
+                devices.append(device)
+        self._devices = devices
+        _LOGGER.info("Resynced %d device(s) from Came", len(devices))
+
     def _update_devices(self) -> Optional[List[CameDevice]]:
         """Update devices info from Came device."""
         if self._devices is None:
             _LOGGER.debug("Updating devices info from CAME")
 
-            devices = []
-            for feature in self._get_features():
-                devices.extend(get_featured_devices(self, feature))
-
-            self._devices = devices
+            self._devices = self._fetch_devices()
             _LOGGER.info(
                 "Loaded %d device(s) from Came: %s",
                 len(self._devices),
@@ -343,13 +403,21 @@ class CameManager:
             self._update_devices()
             return True
 
+        if self._resync_needed:
+            # Reconnected: states may have changed while we were away
+            self._resync_devices()
+            self._resync_needed = False  # only once the resync succeeded
+            return True
+
         cmd = {
             "cmd_name": "status_update_req",
         }
         if timeout is not None:
             cmd["timeout"] = timeout
         
-        response = self.application_request(cmd, "status_update_resp")
+        response = self.application_request(
+            cmd, "status_update_resp", read_timeout=STATUS_UPDATE_READ_TIMEOUT
+        )
         
         if response and DEBUG_DEEP:
             _LOGGER.debug("Status update response: %s", response)
@@ -373,8 +441,7 @@ class CameManager:
             # Handle plant update (device list changed)
             if cmd_name == "plant_update_ind":
                 _LOGGER.info("Plant update detected, reloading devices")
-                self._devices = None
-                self._update_devices()
+                self._resync_devices()
                 return True
             
             # Update individual device state
