@@ -31,23 +31,8 @@ class ScenarioDevice(CameDevice):
         """Return device name."""
         return self._name
 
-    @property
-    def device_type(self):
-        """Return device type."""
-        return "scenarios"
-
-    @property
-    def available_scenarios(self):
-        """Return list of available scenarios."""
-        return self._manager.get_scenarios()
-
-    def activate(self, scenario_id: int):
-        """Activate a scenario."""
-        self._manager.activate_scenario(scenario_id)
-
-    def update(self, data: dict) -> bool:
-        """Update device state (scenarios don't have state)."""
-        return False
+    def update(self):
+        """Scenarios have no state: listing and activation go through ScenarioManager."""
 
 
 class ScenarioManager:

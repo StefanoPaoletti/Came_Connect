@@ -15,7 +15,7 @@
             }
         },
         "error": {
-            "auth": "Authentication failed. Please check your Host IP, Username and Password.",
+            "invalid_auth": "Authentication failed. Please check your Host IP, Username and Password.",
             "cannot_connect": "Unable to connect to CAME device. Please check the Host IP and ensure the device is online.",
             "timeout": "Connection timeout. Please check your network and try again.",
             "unknown": "An unexpected error occurred. Please try again."

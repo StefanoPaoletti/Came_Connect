@@ -9,9 +9,6 @@ from pathlib import Path
 # Debug flag - set to True for deep debugging (verbose logs)
 DEBUG_DEEP = False
 
-# Issue tracker URL
-ISSUE_URL = "https://github.com/StefanoPaoletti/Came_Connect/issues"
-
 
 # Read version ONCE at module import (before event loop starts)
 def _load_version() -> str:
@@ -26,16 +23,4 @@ def _load_version() -> str:
         return "unknown"
 
 
-# Load version immediately at import (not in event loop)
 VERSION = _load_version()
-
-# Startup message with version already embedded
-STARTUP_MESSAGE = f"""
--------------------------------------------------------------------
-Came Connect API Python Client - Optimized Version
-Version: {VERSION}
-Based on original work by Den901
-For issues or suggestions:
-{ISSUE_URL}
--------------------------------------------------------------------
-"""

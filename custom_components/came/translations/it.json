@@ -15,7 +15,7 @@
             }
         },
         "error": {
-            "auth": "Autenticazione fallita. Verifica indirizzo IP, nome utente e password.",
+            "invalid_auth": "Autenticazione fallita. Verifica indirizzo IP, nome utente e password.",
             "cannot_connect": "Impossibile connettersi al dispositivo CAME. Verifica l'indirizzo IP e che il dispositivo sia online.",
             "timeout": "Timeout della connessione. Verifica la rete e riprova.",
             "unknown": "Si è verificato un errore imprevisto. Riprova."

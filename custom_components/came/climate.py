@@ -12,10 +12,6 @@ from homeassistant.components.climate import (
 )
 from homeassistant.components.climate.const import HVACAction
 from .pycame.devices.came_thermo import (
-    THERMO_FAN_SPEED_SLOW,
-    THERMO_FAN_SPEED_MEDIUM,
-    THERMO_FAN_SPEED_FAST,
-    THERMO_FAN_SPEED_AUTO,
     THERMO_DEHUMIDIFIER_ON,
     THERMO_MODE_AUTO,
     THERMO_MODE_JOLLY,
@@ -102,13 +98,6 @@ class CameClimateEntity(CameEntity, ClimateEntity):
         self._attr_target_temperature_step = PRECISION_TENTHS
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
 
-        self._attr_supported_features = (
-            ClimateEntityFeature.TURN_ON
-            | ClimateEntityFeature.TURN_OFF
-        )
-        if device.support_target_humidity:
-            self._attr_supported_features |= ClimateEntityFeature.TARGET_HUMIDITY
-
     @property
     def supported_features(self) -> ClimateEntityFeature:
         feat = (
@@ -179,7 +168,7 @@ class CameClimateEntity(CameEntity, ClimateEntity):
 
     def set_temperature(self, **kwargs) -> None:
         if self._device.mode == THERMO_MODE_AUTO:
-            _LOGGER.info("Richiesta temperatura ignorata: %s è in modalità AUTO", self.name)
+            _LOGGER.info("Richiesta temperatura ignorata: %s è in modalità AUTO", self.entity_id)
             return
         if (temp := kwargs.get(ATTR_TEMPERATURE)) is not None:
             self._device.set_target_temperature(temp)
@@ -194,7 +183,14 @@ class CameClimateEntity(CameEntity, ClimateEntity):
         elif hvac_mode == HVACMode.AUTO:
             self._device.zone_config(mode=THERMO_MODE_AUTO)
         else:
-            self._device.zone_config(mode=THERMO_MODE_AUTO)
+            # DRY is only reported (dehumidifier active on the CAME side):
+            # there is no CAME command to switch it on from here, so leave
+            # the zone untouched instead of silently forcing AUTO.
+            _LOGGER.warning(
+                "Modalità %s non impostabile da HA per %s: nessuna modifica",
+                hvac_mode,
+                self.entity_id,
+            )
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
